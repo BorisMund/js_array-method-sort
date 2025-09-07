@@ -14,6 +14,13 @@ function applyCustomSort() {
   [].__proto__.sort2 = function (compareFunction) {
     const arr = this;
 
+    if (
+      compareFunction !== undefined &&
+      typeof compareFunction !== 'function'
+    ) {
+      throw new TypeError('Eror');
+    }
+
     const cmp =
       compareFunction ??
       ((a, b) => {
@@ -30,16 +37,35 @@ function applyCustomSort() {
 
         return 0;
       });
+    const basket = [];
+    let k = 0;
 
     for (let i = 0; i < arr.length; i++) {
-      for (let j = 0; j < arr.length - i - 1; j++) {
-        if (cmp(arr[j], arr[j + 1]) > 0) {
-          const temp = arr[j];
+      if (i in arr) {
+        basket[k] = arr[i];
+        k++;
+      }
+    }
 
-          arr[j] = arr[j + 1];
-          arr[j + 1] = temp;
+    for (let i = 0; i < basket.length; i++) {
+      for (let j = 0; j < basket.length - i - 1; j++) {
+        if (cmp(basket[j], basket[j + 1]) > 0) {
+          const temp = basket[j];
+
+          basket[j] = basket[j + 1];
+          basket[j + 1] = temp;
         }
       }
+    }
+
+    // Записываем отсортированные значения обратно в массив
+    for (let i = 0; i < basket.length; i++) {
+      arr[i] = basket[i];
+    }
+
+    // Остальные индексы делаем "дырами" (как у нативного sort)
+    for (let i = basket.length; i < arr.length; i++) {
+      delete arr[i];
     }
 
     return arr;
